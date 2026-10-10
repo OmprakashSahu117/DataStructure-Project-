@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linked List Adventure</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Trebuchet MS",Arial,sans-serif}
+body{min-height:100vh;background:radial-gradient(circle at top left,#5b4bdb,transparent 35%),radial-gradient(circle at bottom right,#00b894,transparent 35%),#111827;color:white;padding:20px}
+.game{max-width:1200px;margin:auto}
+.header{text-align:center;margin-bottom:20px}
+.header h1{font-size:42px;color:#ffe66d;text-shadow:3px 3px #000}
+.header p{margin-top:8px;color:#dfe6e9;font-size:18px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:20px}
+.stat{background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.2);border-radius:15px;padding:15px;text-align:center;backdrop-filter:blur(10px)}
+.stat .icon{font-size:25px}.stat h3{color:#ffe66d;margin-top:5px}.stat span{font-size:25px;font-weight:bold}
+.mission{background:linear-gradient(135deg,#ff7675,#d63031);border-radius:18px;padding:18px;margin-bottom:20px;box-shadow:0 8px 20px rgba(0,0,0,.3)}
+.mission h2{margin-bottom:7px}.mission p{font-size:17px}
+.board{background:#f8f9fa;color:#222;border-radius:20px;padding:25px;min-height:330px;box-shadow:0 10px 30px rgba(0,0,0,.35);overflow-x:auto}
+.board-title{text-align:center;color:#2d3436;margin-bottom:25px}
+.list-container{min-height:150px;display:flex;align-items:center;justify-content:center}
+.linked-list{display:flex;align-items:center;min-width:max-content}.node-wrapper{display:flex;align-items:center}
+.node{width:130px;border:4px solid #6c5ce7;border-radius:14px;background:white;overflow:hidden;box-shadow:0 7px 15px rgba(0,0,0,.2);animation:nodeAppear .5s ease}
+.node-header{background:#6c5ce7;color:white;padding:7px;text-align:center;font-size:13px;font-weight:bold}
+.node-data{padding:15px;text-align:center;font-size:27px;font-weight:bold;color:#2d3436}
+.node-next{background:#dfe6e9;padding:7px;text-align:center;color:#636e72;font-size:12px}
+.arrow{font-size:40px;color:#0984e3;margin:0 12px;font-weight:bold}
+.null{background:#2d3436;color:white;padding:15px 12px;border-radius:10px;font-weight:bold}
+.empty{text-align:center;color:#636e72}.empty .big{font-size:60px}.empty h2{margin:10px}
+.controls{background:rgba(255,255,255,.1);padding:20px;border-radius:20px;margin-top:20px}
+.controls h2{text-align:center;color:#ffe66d;margin-bottom:15px}
+.inputs{display:flex;justify-content:center;gap:10px;margin-bottom:15px;flex-wrap:wrap}
+input{padding:13px;border-radius:10px;border:3px solid #636e72;font-size:16px;width:180px;outline:none}
+input:focus{border-color:#ffe66d}
+.buttons{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+button{border:none;padding:13px 18px;border-radius:12px;color:white;font-size:15px;font-weight:bold;cursor:pointer;transition:.2s}
+button:hover{transform:scale(1.05)}
+.green{background:#00b894}.blue{background:#0984e3}.red{background:#d63031}.orange{background:#e17055}.purple{background:#6c5ce7}.gray{background:#636e72}
+.explanation{background:#fff;color:#2d3436;border-radius:18px;padding:20px;margin-top:20px}
+.explanation h2{color:#6c5ce7;margin-bottom:12px}
+.steps{display:flex;gap:10px;flex-wrap:wrap}
+.step{flex:1;min-width:180px;background:#f1f2f6;padding:15px;border-radius:12px}
+.step b{color:#6c5ce7}
+.status{margin-top:20px;background:#ffeaa7;color:#2d3436;padding:15px;border-radius:12px;text-align:center;font-weight:bold;font-size:17px}
+@keyframes nodeAppear{from{opacity:0;transform:scale(.5) rotate(-10deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+.found{animation:foundAnimation 1s infinite;border-color:#00b894!important}
+@keyframes foundAnimation{0%,100%{box-shadow:0 0 5px #00b894}50%{box-shadow:0 0 30px #00b894}}
+.footer{text-align:center;margin-top:20px;color:#b2bec3}
+@media(max-width:700px){.header h1{font-size:30px}.stats{grid-template-columns:1fr}.board{padding:15px}}
+</style>
+</head>
+<body>
+<div class="game">
+  <div class="header"><h1>🎮 LINKED LIST ADVENTURE</h1><p>Learn Linked Lists by Playing!</p></div>
+  <div class="stats">
+    <div class="stat"><div class="icon">⭐</div><h3>Score</h3><span id="score">0</span></div>
+    <div class="stat"><div class="icon">🏆</div><h3>Level</h3><span id="level">1</span></div>
+    <div class="stat"><div class="icon">🔗</div><h3>Nodes</h3><span id="nodeCount">0</span></div>
+  </div>
+  <div class="mission"><h2>🎯 Current Mission</h2><p id="mission">Add your first node to the linked list!</p></div>
+  <div class="board">
+    <h2 class="board-title">🗺️ Linked List Game Board</h2>
+    <div class="list-container" id="listContainer"><div class="empty"><div class="big">📭</div><h2>List is Empty</h2><p>Add a node to start your adventure!</p></div></div>
+  </div>
+  <div class="controls">
+    <h2>🎮 Game Controls</h2>
+    <div class="inputs"><input type="number" id="value" placeholder="Enter value"><input type="number" id="position" placeholder="Position" min="0"></div>
+    <div class="buttons">
+      <button class="green" onclick="insertBeginning()">⬅️ Add First</button>
+      <button class="green" onclick="insertEnd()">➡️ Add Last</button>
+      <button class="purple" onclick="insertPosition()">📍 Add at Position</button>
+      <button class="red" onclick="deleteBeginning()">🗑️ Delete First</button>
+      <button class="red" onclick="deleteEnd()">🗑️ Delete Last</button>
+      <button class="orange" onclick="deletePosition()">📍 Delete Position</button>
+      <button class="blue" onclick="searchNode()">🔍 Search</button>
+      <button class="gray" onclick="resetGame()">🔄 Restart</button>
+    </div>
+  </div>
+  <div class="status" id="status">🎮 Welcome! Let's learn Linked Lists!</div>
+  <div class="explanation">
+    <h2>💡 How Does a Linked List Work?</h2>
+    <div class="steps">
+      <div class="step"><b>1️⃣ DATA</b><p>Every node stores a value.</p></div>
+      <div class="step"><b>2️⃣ NEXT</b><p>NEXT points to the next node.</p></div>
+      <div class="step"><b>3️⃣ LINK</b><p>Nodes are connected using links.</p></div>
+      <div class="step"><b>4️⃣ NULL</b><p>The last node points to NULL.</p></div>
+    </div>
+  </div>
+  <div class="footer">🎓 Linked List Simulator Mini Project</div>
+</div>
+<script>
+class Node{constructor(data){this.data=data;this.next=null}}
+let head=null,score=0,level=1;
+function displayList(){
+ const container=document.getElementById("listContainer");container.innerHTML="";
+ if(head===null){container.innerHTML=`<div class="empty"><div class="big">📭</div><h2>List is Empty</h2><p>Add a node to start your adventure!</p></div>`;updateStats();return}
+ const list=document.createElement("div");list.className="linked-list";let current=head,position=0;
+ while(current!==null){
+  const wrapper=document.createElement("div");wrapper.className="node-wrapper";
+  wrapper.innerHTML=`<div class="node" id="node-${position}"><div class="node-header">NODE ${position}</div><div class="node-data">${current.data}</div><div class="node-next">NEXT ➡️</div></div>`;
+  list.appendChild(wrapper);const arrow=document.createElement("div");arrow.className="arrow";arrow.innerHTML="→";list.appendChild(arrow);current=current.next;position++;
+ }
+ const nullBox=document.createElement("div");nullBox.className="null";nullBox.innerHTML="NULL";list.appendChild(nullBox);container.appendChild(list);updateStats();
+}
+function getValue(){const input=document.getElementById("value");if(input.value===""){showStatus("⚠️ Please enter a value first!");return null}return Number(input.value)}
+function insertBeginning(){const value=getValue();if(value===null)return;const newNode=new Node(value);newNode.next=head;head=newNode;addScore(10);displayList();showStatus("🎉 Great! Node "+value+" was added at the START. The new node became HEAD.");updateMission();clearInputs()}
+function insertEnd(){const value=getValue();if(value===null)return;const newNode=new Node(value);if(head===null){head=newNode}else{let current=head;while(current.next!==null)current=current.next;current.next=newNode}addScore(10);displayList();showStatus("🎉 Node "+value+" was added at the END of the list.");updateMission();clearInputs()}
+function insertPosition(){
+ const value=getValue(),positionInput=document.getElementById("position"),position=Number(positionInput.value);if(value===null)return;
+ if(positionInput.value===""||!Number.isInteger(position)||position<0){showStatus("⚠️ Enter a valid position!");return}
+ if(position===0){insertBeginning();return}if(head===null){showStatus("❌ Position does not exist.");return}
+ let current=head;for(let i=0;i<position-1;i++){if(current===null){showStatus("❌ Position does not exist.");return}current=current.next}
+ if(current===null){showStatus("❌ Position does not exist.");return}
+ const newNode=new Node(value);newNode.next=current.next;current.next=newNode;addScore(15);displayList();showStatus("🎯 Success! Node "+value+" inserted at position "+position+".");updateMission();clearInputs()
+}
+function deleteBeginning(){if(head===null){showStatus("❌ The list is already empty!");return}const deleted=head.data;head=head.next;addScore(10);displayList();showStatus("🗑️ Node "+deleted+" was deleted from the START.");updateMission()}
+function deleteEnd(){
+ if(head===null){showStatus("❌ The list is already empty!");return}
+ if(head.next===null){const deleted=head.data;head=null;addScore(10);displayList();showStatus("🗑️ Node "+deleted+" was deleted.");updateMission();return}
+ let current=head;while(current.next.next!==null)current=current.next;const deleted=current.next.data;current.next=null;addScore(10);displayList();showStatus("🗑️ Node "+deleted+" was deleted from the END.");updateMission()
+}
+function deletePosition(){
+ const positionInput=document.getElementById("position"),position=Number(positionInput.value);
+ if(positionInput.value===""||!Number.isInteger(position)||position<0){showStatus("⚠️ Enter a valid position!");return}
+ if(head===null){showStatus("❌ The list is empty!");return}if(position===0){deleteBeginning();return}
+ let current=head;for(let i=0;i<position-1;i++){if(current===null||current.next===null){showStatus("❌ Position does not exist.");return}current=current.next}
+ if(current.next===null){showStatus("❌ Position does not exist.");return}
+ const deleted=current.next.data;current.next=current.next.next;addScore(15);displayList();showStatus("🎯 Node "+deleted+" deleted from position "+position+".");updateMission()
+}
+function searchNode(){
+ const value=getValue();if(value===null)return;let current=head,position=0;
+ while(current!==null){if(current.data===value){addScore(20);displayList();setTimeout(()=>{const node=document.getElementById("node-"+position);if(node)node.classList.add("found")},100);showStatus("🔍 FOUND! Value "+value+" is at position "+position+".");updateMission();return}current=current.next;position++}
+ showStatus("😕 Value "+value+" was not found.")
+}
+function addScore(points){const previousLevel=level;score+=points;level=Math.floor(score/50)+1;updateStats();if(level>previousLevel)showStatus("🎊 LEVEL UP! You reached Level "+level+"!")}
+function updateStats(){document.getElementById("score").textContent=score;document.getElementById("level").textContent=level;let count=0,current=head;while(current!==null){count++;current=current.next}document.getElementById("nodeCount").textContent=count}
+function updateMission(){
+ let count=0,current=head;while(current!==null){count++;current=current.next}const mission=document.getElementById("mission");
+ if(count===0)mission.textContent="Add your first node to begin! 🚀";
+ else if(count===1)mission.textContent="Awesome! Now add another node. 🔗";
+ else if(count<5)mission.textContent="Build your chain! Try reaching 5 nodes. 💪";
+ else if(count>=5&&level<3)mission.textContent="Amazing! Try searching for a node. 🔍";
+ else mission.textContent="🏆 You are a Linked List Master!";
+}
+function resetGame(){head=null;score=0;level=1;displayList();updateStats();document.getElementById("mission").textContent="Add your first node to the linked list!";showStatus("🔄 Game restarted! Good luck!");clearInputs()}
+function clearInputs(){document.getElementById("value").value="";document.getElementById("position").value=""}
+function showStatus(message){document.getElementById("status").textContent=message}
+displayList();updateStats();
+</script>
+</body>
+</html>
